@@ -1,0 +1,3 @@
+proxy:
+  "/threads": "http://localhost:4567/threads"
+  "/comments": "http://localhost:4567/comments"
