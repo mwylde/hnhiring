@@ -6,7 +6,8 @@ require 'json'
 SPACER = "http://ycombinator.com/images/s.gif"
 
 def get_comments(id)
-  doc = Nokogiri::HTML(open("http://news.ycombinator.com/item?id=#{id}"))
+  html = open("http://news.ycombinator.com/item?id=#{id}")
+  doc = Nokogiri::HTML(html.read)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
@@ -35,7 +36,8 @@ def get_comments(id)
 end
 
 def get_threads
-  doc = Nokogiri::HTML(open('http://news.ycombinator.com/submitted?id=whoishiring'))
+  html = open('http://news.ycombinator.com/submitted?id=whoishiring')
+  doc = Nokogiri::HTML(html.read)
   doc.css(".title a").map{|x| [x.text, x.attr("href").match(/id=(\d+)/)[1]]}.map{|t|
     date = t[0].match(/\((\w+) (\d+)\)/)
     if date
