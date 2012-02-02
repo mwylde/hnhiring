@@ -14,17 +14,17 @@ select_thread = (id) ->
       "<li class=\"comment\">
         <div class=\"top\">
           <div class=\"posted-by\">
-            <a href=\"http://news.ycombinator.com/users?id=#{c.submitter}\">#{c.submitter}</a>
+            <a href=\"http://news.ycombinator.com/user?id=#{c.submitter}\">#{c.submitter}</a>
           </div>
           <div class=\"link\">
-            <a href=\"#{c.link}\">link</a>
+            <a href=\"#{c.url}\">link</a>
           </div>
         </div>
         <div class=\"body\">#{c.html}</div></li>"
       )
     $("#content ul").html cs.value().join("\n")
 
-  $("#content ul").html "Loading..."
+  $("#content ul").html '<div class="loading"><img src="/loading.gif" /></div>'
   $("li.selected").removeClass("selected")
   $("li:has(##{id})").addClass("selected")
 
@@ -39,7 +39,8 @@ $(document).ready () ->
       "<li><a class=\"thread-link\" href=\"javascript:\" id=\"#{d[1]}\">#{d[0]}</a></li>")
     $("#sidebar ul").html threads.join("\n")
     $("a.thread-link").on "click", (e) ->
-      select_thread(e.srcElement.id)
+      el = e.srcElement or e.target
+      select_thread(el.id)
 
     select_thread(data[0][1])
 

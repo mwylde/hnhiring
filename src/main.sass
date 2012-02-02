@@ -23,6 +23,11 @@ a
     position: absolute
     right: 5px
     top: 0
+    .desc
+      color: #ccc
+      font-size: 14px
+      font-weight: normal
+      letter-spacing: 0.18em
     input  
       font-size: 14px
       padding: 3px
@@ -104,6 +109,16 @@ a
       .body
         line-height: 22px
 
+  .loading
+    img
+      width: 100px
+      height: 100px
+      position: absolute
+      left: 50%
+      top: 50%
+      margin-left: -50px  
+      margin-top: -50px
+
 #plug
   position: fixed
   width: 500px
@@ -112,9 +127,14 @@ a
   bottom: 0
   right: 0
   background-color: black
+  opacity: 0.8
   color: white
   font-size: 18px  
   text-align: center
+  background-color: rgba(0, 0, 0, 0.8)
+  -webkit-opacity: 1
+  -moz-opacity: 1  
   a
     color: #ccc
     text-decoration: underline
+

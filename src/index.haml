@@ -5,10 +5,22 @@
     slinky_styles
     %title HN Hiring
 
+    :javascript
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-78795-9']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
   %body
     #header
       who is hiring?
       .filter
+        %span.desc filter
         %input{:type => :search, :name => "filter", :placeholder => "reg exp filter"} 
     #main
       #sidebar
@@ -16,7 +28,6 @@
       #content
         %ul
 
-
     #plug
-      looking for a developer in NY? Check out
+      looking for a developer in NYC? Check out
       %a{:href => "http://micahw.com"} my portfolio.
