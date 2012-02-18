@@ -1,4 +1,3 @@
-require 'sinatra'
 require 'nokogiri'
 require 'open-uri'
 require 'json'
@@ -54,10 +53,10 @@ def get_threads
   }.compact
 end
 
-configure do
-  set :threads, get_threads
+def load_data
+  threads = get_threads
   comments_by_thread = {}
-  settings.threads.each{|t|
+  threads.each{|t|
     begin
       comments_by_thread[t[1]] = get_comments(t[1])
       sleep 1 # try not to annoy PG
@@ -66,13 +65,18 @@ configure do
       puts "Failed on #{t[0]}: #{$!}"
     end
   }
-  set :comments, comments_by_thread
+  comments = comments_by_thread
+  [threads, comments]
 end
 
-get '/comments/:id' do
-  JSON.dump(settings.comments[params[:id]])
-end
-
-get '/threads' do
-  JSON.dump(settings.threads)
+if __FILE__ == $0
+  threads, comments = load_data
+  File.open(ARGV[0] + "/threads.json", "w+"){|f|
+    f.write(JSON.dump(threads))
+  }
+  comments.each{|id, data|
+    File.open(ARGV[0] + "/comments-#{id}.json", "w+"){|f|
+      f.write(JSON.dump(data))
+    }
+  }
 end

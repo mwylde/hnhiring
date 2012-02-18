@@ -5,7 +5,7 @@ App =
   threads: {}
 
 get_threads = (cb) ->
-  $.ajax url: "/threads", success: cb, dataType: 'json'
+  $.ajax url: "/data//threads.json", success: cb, dataType: 'json'
 
 select_thread = (id) ->
   cb = (comments) ->
@@ -32,7 +32,7 @@ select_thread = (id) ->
   if App.threads[id]
     cb(App.threads[id])
   else
-    $.ajax url: "/comments/#{id}", success: cb, dataType: 'json'
+    $.ajax url: "/data/comments-#{id}.json", success: cb, dataType: 'json'
 
 filter = () ->
   r = new RegExp($(".filter input").val(), "gi")
