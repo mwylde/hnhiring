@@ -23,6 +23,7 @@ select_thread = (id) ->
         <div class=\"body\">#{c.html}</div></li>"
       )
     $("#content ul").html cs.value().join("\n")
+    filter()
 
   $("#content ul").html '<div class="loading"><img src="/loading.gif" /></div>'
   $("li.selected").removeClass("selected")
@@ -32,6 +33,15 @@ select_thread = (id) ->
     cb(App.threads[id])
   else
     $.ajax url: "/comments/#{id}", success: cb, dataType: 'json'
+
+filter = () ->
+  r = new RegExp($(".filter input").val(), "gi")
+  $("li.comment").each (i, el) ->
+    text = $(".body", el).html()
+    if r.test(text)
+      $(el).show()
+    else
+      $(el).hide()
 
 $(document).ready () ->
   get_threads (data) ->
@@ -45,11 +55,4 @@ $(document).ready () ->
     select_thread(data[0][1])
 
   $(".filter input").keyup () ->
-    r = new RegExp($(".filter input").val(), "gi")
-    console.log("val", $(".filter").val())
-    $("li.comment").each (i, el) ->
-      text = $(".body", el).html()
-      if r.test(text)
-        $(el).show()
-      else
-        $(el).hide()
+    filter()

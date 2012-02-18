@@ -11,15 +11,18 @@ def get_comments(id)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
-    {
-      :id => link.attr('href').match(/id=(\d+)/)[1],
-      :level => c.parent.parent.css("img[src=\"#{SPACER}\"]").first.attr('width').to_i / 40,
-      :html => c.to_s,
-      :submitter => submitter.text,
-      :url => "http://news.ycombinator.com/#{link.attr('href')}",
-      :belongs_to => nil
-    }
-  }.reduce([]){|a, c|
+    begin
+      {
+        :id => link.attr('href').match(/id=(\d+)/)[1],
+        :level => c.parent.parent.css("img[src=\"#{SPACER}\"]").first.attr('width').to_i / 40,
+        :html => c.to_s,
+        :submitter => submitter.text,
+        :url => "http://news.ycombinator.com/#{link.attr('href')}",
+        :belongs_to => nil
+      }
+    rescue
+    end
+  }.compact.reduce([]){|a, c|
     if c[:level] == 0
     elsif c[:level] > a[-1][:level]
       c[:belongs_to] = a[-1][:id]
@@ -60,7 +63,7 @@ configure do
       sleep 1 # try not to annoy PG
       puts "Loaded #{t[0]}"
     rescue
-      puts "Failed on #{t[0]}"
+      puts "Failed on #{t[0]}: #{$!}"
     end
   }
   set :comments, comments_by_thread
