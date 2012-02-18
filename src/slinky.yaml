@@ -1,4 +1,0 @@
-proxy:
-  "/threads": "http://localhost:4567/threads"
-  "/comments": 
-    to: "http://localhost:4567/comments"

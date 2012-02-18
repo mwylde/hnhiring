@@ -56,3 +56,7 @@ $(document).ready () ->
 
   $(".filter input").keyup () ->
     filter()
+  $(".filter input").click () ->
+    # We have to catch the case that the "x" button was clicked
+    if $(".filter input").val() == ""
+      filter()
