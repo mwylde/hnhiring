@@ -1,8 +1,22 @@
 require 'nokogiri'
 require 'open-uri'
 require 'json'
+require 'redis'
 
 SPACER = "http://ycombinator.com/images/s.gif"
+
+def handle_time id, s
+  redis = Redis.new
+  if t = redis.get("hnhiring:comments:#{id}")
+    Time.at(t)
+  else
+    _, n, unit = s.match(/(\d+) (seconds|minutes|hours|days) ago/)
+    multiple = {"seconds" => 1, "minutes" => 60, "hours" => 60*60, "days" => 60*60*24}
+    time = Time.now - n.to_i * multiple(unit)
+    redis.set("hnhiring:comments:#{id}", time.to_i)
+    time
+  end
+end
 
 def get_comments(id)
   html = open("http://news.ycombinator.com/item?id=#{id}")
@@ -11,13 +25,17 @@ def get_comments(id)
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
     begin
+      cid = link.attr('href').match(/id=(\d+)/)[1],
+      time_string = c.parent.css(".comhead").children[1].to_s
+      time = handle_time cid, time_string
       {
-        :id => link.attr('href').match(/id=(\d+)/)[1],
+        :id => cid,
         :level => c.parent.parent.css("img[src=\"#{SPACER}\"]").first.attr('width').to_i / 40,
         :html => c.to_s,
         :submitter => submitter.text,
         :url => "http://news.ycombinator.com/#{link.attr('href')}",
-        :belongs_to => nil
+        :belongs_to => nil,
+        :time => time
       }
     rescue
     end
