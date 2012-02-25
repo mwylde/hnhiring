@@ -10,17 +10,22 @@ get_threads = (cb) ->
 select_thread = (id) ->
   cb = (comments) ->
     App.threads[id] = comments
-    cs = _(comments).chain().filter((c) -> c.level == 0).map((c) ->
-      "<li class=\"comment\">
-        <div class=\"top\">
-          <div class=\"posted-by\">
-            <a href=\"http://news.ycombinator.com/user?id=#{c.submitter}\">#{c.submitter}</a>
+    cs = _(comments).chain()
+      .sortBy((c) -> c.time)
+      .filter((c) -> c.level == 0)
+      .map((c) ->
+        """
+          <li class="comment">
+          <div class="top">
+            <div class="posted-by">
+              <a href="http://news.ycombinator.com/user?id=#{c.submitter}">#{c.submitter}</a>
+            </div>
+            <div class="link">
+              <a href="#{c.url}">link</a>
+            </div>
           </div>
-          <div class=\"link\">
-            <a href=\"#{c.url}\">link</a>
-          </div>
-        </div>
-        <div class=\"body\">#{c.html}</div></li>"
+          <div class="body">#{c.html}</div></li>
+        """
       )
     $("#content ul").html cs.value().join("\n")
     filter()
@@ -33,6 +38,28 @@ select_thread = (id) ->
     cb(App.threads[id])
   else
     $.ajax url: "/data/comments-#{id}.json", success: cb, dataType: 'json'
+
+current_thread = () ->
+  _($("li.comment"))
+    .chain()
+    .filter((el) -> $(el).position().top < 0)
+    .last()
+    .value()
+
+next_thread = () ->
+  _($("li.comment")).find((el) -> $(el).position().top > 0)
+
+previous_thread = () ->
+  $(current_thread()).prev()
+
+scroll_to = (el) ->
+  if el and $(el).offset()
+    top = $("#content").scrollTop() + $(el).offset().top - 25
+    $("#content").animate({scrollTop: top})
+    window.scrollTo(0.6)
+
+hide = (el) ->
+  $(el).toggleClass("hidden")
 
 filter = () ->
   r = new RegExp($(".filter input").val(), "gi")
@@ -60,3 +87,15 @@ $(document).ready () ->
     # We have to catch the case that the "x" button was clicked
     if $(".filter input").val() == ""
       filter()
+
+  # Set up keyboard shortcuts
+  $(document).keydown (data) ->
+    switch data.which
+      when 74,32 # J, space
+        scroll_to(next_thread())
+      when 75 # K
+        scroll_to(previous_thread())
+      when 72 # H
+        hide(current_thread())
+
+window.App = App

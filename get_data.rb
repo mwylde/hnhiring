@@ -5,6 +5,10 @@ require 'redis'
 
 SPACER = "http://ycombinator.com/images/s.gif"
 
+EXCEPTIONS = {
+  "3300371" => "3300290"
+}
+
 @redis = Redis.new
 
 def handle_time id, s
@@ -61,12 +65,13 @@ def get_threads
   doc = Nokogiri::HTML(html.read)
   doc.css(".title a").map{|x| [x.text, x.attr("href").match(/id=(\d+)/)[1]]}.map{|t|
     date = t[0].match(/\((\w+) (\d+)\)/)
+    id = EXCEPTIONS[t[1]] || t[1]
     if date
       date_str = "#{date[1][0..2]} #{date[2]} &mdash; "
       if t[0].match("Seeking freelancer")
-        [date_str + "freelancers", t[1]]
+        [date_str + "freelancers", id]
       elsif t[0].match("Who is Hiring")
-        [date_str + "fulltime", t[1]]
+        [date_str + "fulltime", id]
       end
     end
   }.compact
@@ -78,7 +83,7 @@ def load_data
   threads.each{|t|
     begin
       comments_by_thread[t[1]] = get_comments(t[1])
-      sleep 1 # try not to annoy PG
+      sleep 0.5 # try not to annoy PG
       puts "Loaded #{t[0]}"
     rescue
       puts "Failed on #{t[0]}: #{$!}"
