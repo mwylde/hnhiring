@@ -40,21 +40,21 @@ select_thread = (id) ->
     $.ajax url: "/data/comments-#{id}.json", success: cb, dataType: 'json'
 
 current_thread = () ->
-  _($("li.comment"))
-    .chain()
-    .filter((el) -> $(el).position().top < 0)
-    .last()
-    .value()
+  $(next_thread()).prev()
+
+on_scroll = () ->
+  $("li.comment").removeClass("current")
+  $(current_thread()).addClass("current")
 
 next_thread = () ->
-  _($("li.comment")).find((el) -> $(el).position().top > 0)
+  _($("li.comment")).find((el) -> $(el).position().top > 40)
 
 previous_thread = () ->
   $(current_thread()).prev()
 
 scroll_to = (el) ->
   if el and $(el).offset()
-    top = $("#content").scrollTop() + $(el).offset().top - 25
+    top = $("#content").scrollTop() + $(el).offset().top - 45
     $("#content").animate({scrollTop: top})
     window.scrollTo(0.6)
 
@@ -98,4 +98,6 @@ $(document).ready () ->
       when 72 # H
         hide(current_thread())
 
+  $("#content").scroll (() -> on_scroll())
+  on_scroll()
 window.App = App

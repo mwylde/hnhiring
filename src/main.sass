@@ -82,6 +82,7 @@ a
           text-shadow: 1px 1px #fff
       &:nth-child(1)
         border-top: none
+
 #content
   position: absolute
   left: 300px
@@ -94,11 +95,13 @@ a
     margin: 0
     padding: 0  
     li
+      background-color: #eee
       display: block
       //min-height: 100px
       padding: 20px
-      margin-left: 10px
-      margin-right: 10px  
+      margin: 10px
+      margin-right: 10px
+      border: #ccc solid 2px
       border-bottom: #aaa solid 2px
       .top
         width: 100%
@@ -111,6 +114,13 @@ a
         line-height: 22px
       &.hidden
         opacity: 0.3
+      &.current
+        .posted-by:before
+          position: absolute
+          left: 20px  
+          content: "> "
+          color: #aaa  
+        border-left: #777 solid 2px
 
   .loading
     img
