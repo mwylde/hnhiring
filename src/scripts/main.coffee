@@ -80,8 +80,12 @@ class MainView
       @scroll_to(@current)
 
   get_current: () -> @current
-  get_next: () -> if @current.next().size() == 0 then @current else @current.next()
-  get_prev: () -> if @current.prev().size() == 0 then @current else @current.prev()
+  get_next: () ->
+    el = @current.nextAll(":visible").first()
+    if el.size() != 0 then el else @current
+  get_prev: () ->
+    el = @current.prevAll(":visible").first()
+    if el.size() != 0 then el else @current
 
   scroll_to: (el) ->
     if el and $(el).offset()
@@ -103,6 +107,8 @@ class MainView
         $(el).show()
       else
         $(el).hide()
+    if @current.css("display") == "none"
+      @set_current @get_next()
 
 $(document).ready () ->
   main_view = new MainView()
