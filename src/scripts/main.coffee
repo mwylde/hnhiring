@@ -7,8 +7,6 @@ App =
 get_threads = (cb) ->
   $.ajax url: "/data//threads.json", success: cb, dataType: 'json'
 
-select_thread = (id) ->
-
 class MainView
   scrolling: false
 
@@ -24,11 +22,13 @@ class MainView
         when 72 # H
           @hide(@get_current())
 
-      $("#content").scroll (() => @handle_scroll())
-      @set_current $("li.comment", @el).first()
+    $("#content").scroll (() => @handle_scroll())
+    @set_current $("li.comment", @el).first()
 
   load_thread: (id) ->
     @id = id
+    $(".thread-link").parent().removeClass "selected"
+    $("##{id}").parent().addClass "selected"
     @render()
 
   render: () ->
@@ -66,23 +66,27 @@ class MainView
       $.ajax url: "/data/comments-#{@id}.json", success: cb, dataType: 'json'
 
   handle_scroll: () ->
-    if !@scrolling
-      @set_current _($("li.comment")).find((el) -> $(el).position().top > 100)
+    # Require 100px of scrolling before we override the current
+    if !@scrolling and Math.abs($(@el).scrollTop() - @set_at) > 100
+      @set_current _($("li.comment")).find((el) ->
+        $(el).position().top + $(el).height()/2 > 0)
 
-  set_current: (el, scroll) ->
+  set_current: (el, scroll = false) ->
     @current = $(el)
+    @set_at = $(@el).scrollTop()
     $("li.comment").removeClass("current")
     @current.addClass("current")
     if scroll
       @scroll_to(@current)
 
   get_current: () -> @current
-  get_next: () -> @current.next()
-  get_prev: () -> @current.prev()
+  get_next: () -> if @current.next().size() == 0 then @current else @current.next()
+  get_prev: () -> if @current.prev().size() == 0 then @current else @current.prev()
 
   scroll_to: (el) ->
     if el and $(el).offset()
       top = $("#content").scrollTop() + $(el).offset().top - 140 #45
+      @set_at = top
       @scrolling = yes
       $("#content").animate({scrollTop: top}, {complete: () => @scrolling = no})
 
@@ -102,6 +106,7 @@ class MainView
 
 $(document).ready () ->
   main_view = new MainView()
+  App.main_view = main_view
   get_threads (data) ->
     threads = _(data).map((d) ->
       "<li><a class=\"thread-link\" href=\"javascript:\" id=\"#{d[1]}\">#{d[0]}</a></li>")
