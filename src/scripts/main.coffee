@@ -21,6 +21,9 @@ class MainView
           @set_current(@get_prev(), true)
         when 72 # H
           @hide(@get_current())
+        when 70 # F
+          $("input[name='filter']").focus()
+          false
 
     $("#content").scroll (() => @handle_scroll())
     @set_current $("li.comment", @el).first()
@@ -123,8 +126,11 @@ $(document).ready () ->
 
     main_view.load_thread data[1][1]
 
-  $(".filter input").keyup () ->
-    main_view.filter()
+  $(".filter input").keyup (e) ->
+    if e.keyCode == 13 # Enter key
+      $(".filter input").blur()
+    else
+      main_view.filter()
   $(".filter input").click () ->
     # We have to catch the case that the "x" button was clicked
     if $(".filter input").val() == ""
