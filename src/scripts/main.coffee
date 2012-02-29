@@ -10,6 +10,7 @@ get_threads = (cb) ->
 class MainView
   scrolling: false
   counter: 0
+  current: $("")
 
   constructor: () ->
     @el = $("#content")
@@ -33,12 +34,12 @@ class MainView
           false
 
     $("#content").scroll (() => @handle_scroll())
-    @set_current $("li.comment", @el).first()
 
   load_thread: (id) ->
     @id = id
     $(".thread-link").parent().removeClass "selected"
     $("##{id}").parent().addClass "selected"
+    localStorage.setItem("selected_thread", id)
     @render()
 
   render: () ->
@@ -64,7 +65,10 @@ class MainView
         )
       $("#content ul").html cs.value().join("\n")
       @filter()
-      @set_current($("li.comment", @el).first())
+      cid = localStorage.getItem("selected_comment:#{@id}")
+      el = $("##{cid}", @el)
+      console.log(cid, el)
+      @set_current((if el.size() > 0 then el else $("li.comment", @el).first()), yes)
 
       $("li.comment", @el).click (e) =>
         @set_current(e.currentTarget, yes)
@@ -91,6 +95,7 @@ class MainView
     @current.addClass("current")
     if scroll
       @scroll_to(@current)
+    localStorage.setItem("selected_comment:#{@id}", @current.attr('id'))
 
   get_current: () -> @current
   get_next: (i = 0) ->
@@ -142,7 +147,8 @@ $(document).ready () ->
       el = e.srcElement or e.target
       main_view.load_thread el.id
 
-    main_view.load_thread data[1][1]
+    id = localStorage.getItem("selected_thread") or data[1][1]
+    main_view.load_thread id
 
   $(".filter input").keyup (e) ->
     if e.keyCode == 13 # Enter key
