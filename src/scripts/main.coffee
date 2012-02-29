@@ -66,6 +66,9 @@ class MainView
       @filter()
       @set_current($("li.comment", @el).first())
 
+      $("li.comment", @el).click (e) =>
+        @set_current(e.currentTarget, yes)
+
     $("ul", @el).html '<div class="loading"><img src="/loading.gif" /></div>'
     $("li.selected", @el).removeClass("selected")
     $("li:has(##{@id})", @el).addClass("selected")
