@@ -9,6 +9,7 @@ get_threads = (cb) ->
 
 class MainView
   scrolling: false
+  counter: 0
 
   constructor: () ->
     @el = $("#content")
@@ -16,9 +17,15 @@ class MainView
     $(document).keydown (data) =>
       switch data.which
         when 74,32 # J, space
-          @set_current(@get_next(), true)
+          if !@scrolling
+            @set_current(@get_next(), true)
+          else
+            @counter++
         when 75 # K
-          @set_current(@get_prev(), true)
+          if !@scrolling
+            @set_current(@get_prev(), true)
+          else
+            @counter--
         when 72 # H
           @hide(@get_current())
         when 70 # F
@@ -83,11 +90,11 @@ class MainView
       @scroll_to(@current)
 
   get_current: () -> @current
-  get_next: () ->
-    el = @current.nextAll(":visible").first()
+  get_next: (i = 0) ->
+    el = $(@current.nextAll(":visible")[i])
     if el.size() != 0 then el else @current
-  get_prev: () ->
-    el = @current.prevAll(":visible").first()
+  get_prev: (i = 0) ->
+    el = $(@current.prevAll(":visible")[i])
     if el.size() != 0 then el else @current
 
   scroll_to: (el) ->
@@ -95,7 +102,15 @@ class MainView
       top = $("#content").scrollTop() + $(el).offset().top - 140 #45
       @set_at = top
       @scrolling = yes
-      $("#content").animate({scrollTop: top}, {complete: () => @scrolling = no})
+      $("#content").animate({scrollTop: top},
+        complete: () =>
+          @scrolling = no
+          if @counter > 0
+            @set_current(@get_next(@counter), yes)
+          else if @counter < 0
+            @set_current(@get_prev(-@counter), yes)
+          @counter = 0
+      )
 
   hide: (el) ->
     w = $(el)
