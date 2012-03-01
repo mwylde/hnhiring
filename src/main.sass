@@ -145,9 +145,9 @@ a
       margin-left: -50px  
       margin-top: -50px
 
-#plug
+#footer
   position: fixed
-  width: 500px
+  width: 360px
   height: 26px
   line-height: 26px
   bottom: 0
@@ -156,13 +156,15 @@ a
   opacity: 0.8
   color: white
   font-size: 18px  
-  text-align: center
   background-color: rgba(0, 0, 0, 0.8)
   -webkit-opacity: 1
   -moz-opacity: 1  
   a
     color: #ccc
-    text-decoration: underline
+    text-decoration: none
+    margin-left: 45px
+    &:hover
+      text-decoration: underline
 
 
 .modal-background
@@ -171,9 +173,10 @@ a
   left: 0
   right: 0
   bottom: 0
-  background-color: rgba(0,0,0,0.5)
+  background-color: black
+  opacity: 0.5
 
-#keyboard-shortcuts
+.modal-dialog
   position: fixed
   width: 400px
   height: 345px
@@ -182,6 +185,18 @@ a
   margin-left: -200px
   margin-top: -172.5px
   background-color: #eee
+  border: 2px solid #666
+
+  &#about
+    height: 385px
+    margin-top: -192.5px
+    .content
+      margin: 20px
+      margin-top: 55px
+      line-height: 22px
+  
+
+#keyboard-shortcuts
   ul
     margin-top: 60px
     li
