@@ -158,7 +158,6 @@ class MainView
             studying computer science who is, coincidentally, looking for a full-time
             job after graduation.
           </p>
-
           <p>
             The source is available on <a href="https://github.com/mwylde/hnhiring">
               github</a>.
