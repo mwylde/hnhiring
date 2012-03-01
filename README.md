@@ -8,7 +8,7 @@ both sides of the hiring process.
 
 But, let's face it, HN is not the best format for browsing job
 listings. [HNHiring.me](http://hnhiring.me) aims at providing a better
-experience for job searchers making it easier to take advantage of
+experience for job searchers, making it easier to take advantage of
 these posts.
 
 Amongst the features:
@@ -23,9 +23,9 @@ Amongst the features:
 
 The code is split into two pieces. The site itself is completely
 static, which is helpful when Hacker News is sending hundreds of
-simultaneous users to my small VPS. The site is written in
+simultaneous users to my small VPS. It's written in
 CoffeeScript, backed by jQuery and Underscore.js. On page load it
-requests a JSON file containing the job thread which is used to
+requests a JSON file containing the list of job threads, which is used to
 populate the side bar. Then, for each selected thread, a JSON file
 containing the comment data is requested via AJAX.
 
@@ -44,7 +44,7 @@ Note that this script requires a running Redis instance. Why? Because
 unfortunately there is no way to get the timestamp for a HN post. However,
 we do have relative times (e.g., "posted 5 minutes ago"). While these
 are fairly precise within an hour of posting, they quickly become
-useless (the next day, nearly every comment has "posted 1 day ago").
+useless&mdash;the next day, nearly every comment has "posted 1 day ago".
 So by running `get_data.rb` at least once an hour, we can get
 timestamps which are accurate to the minute. But the next time we run
 it we want to maintain the more accurate times, not replace them with
