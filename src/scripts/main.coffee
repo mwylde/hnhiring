@@ -74,14 +74,15 @@ class MainView
               <div class="posted-by">
                 <a href="http://news.ycombinator.com/user?id=#{c.submitter}">#{c.submitter}</a>
               </div>
-              <div class="link">
-                <a href="#{c.url}">link</a>
-              </div>
               <div class="hide">
                 <a href="javascript:">#{if hidden == "hidden" then "+" else "&ndash;"}</a>
               </div>
             </div>
-            <div class="body">#{c.html}</div></li>
+            <div class="body">#{c.html}</div>
+            <div class="link">
+                <a href="#{c.url}">link</a>
+            </div>
+            </li>
           """
         )
       $("#content ul").html cs.value().join("\n")
@@ -244,11 +245,13 @@ $(document).ready () ->
     id = localStorage.getItem("selected_thread") or data[1][1]
     main_view.load_thread id
 
+  $(".filter input").keydown (e) -> e.stopImmediatePropagation()
   $(".filter input").keyup (e) ->
     if e.keyCode == 13 || e.keyCode == 27 # Enter key or escape key
       $(".filter input").blur()
     else
       main_view.filter()
+
   $(".filter input").click () ->
     # We have to catch the case that the "x" button was clicked
     if $(".filter input").val() == ""
