@@ -77,9 +77,9 @@ class MainView
               <div class="link">
                 <a href="#{c.url}">link</a>
               </div>
-              <!--div class="hide">
-                <a href="javascript:">&ndash;</a>
-              </div-->
+              <div class="hide">
+                <a href="javascript:">#{if hidden == "hidden" then "+" else "&ndash;"}</a>
+              </div>
             </div>
             <div class="body">#{c.html}</div></li>
           """
@@ -92,6 +92,10 @@ class MainView
 
       $("li.comment", @el).click (e) =>
         @set_current(e.currentTarget, yes)
+
+      $(".hide a", @el).click (e) =>
+        @hide($(e.currentTarget).parents("li"))
+        false
 
     $("ul", @el).html '<div class="loading"><img src="/loading.gif" /></div>'
     $("li.selected", @el).removeClass("selected")
@@ -135,18 +139,21 @@ class MainView
         <div class="content">
           <p>
             This site aims to be a pleasant interface to the monthly "Who is hiring?"
-            posts on Hacker News. <br />It features:
+            posts on Hacker News.
+          </p>
+          <p>
+            It features:
             <ul>
               <li>A year's worth of posts</li>
               <li>Date-based ordering</li>
               <li>Instant filtering by regular expression</li>
-              <li>Hiding posts that you are uninterested in</li>
+              <li>Ability to hide uninteresting posts</li>
               <li>A range of <a href="javascript:" class="shortcut-link">
                 keyboard shortcuts</a></li>
             </ul>
           </p>
           <p>
-            It was made by <a href="http://micahw.com">Micah Wylde</a>, a senior
+            It was made by <a href="http://micahw.com">Micah Wylde</a>, a Senior
             studying computer science who is, coincidentally, looking for a full-time
             job after graduation.
           </p>
@@ -203,7 +210,13 @@ class MainView
 
   hide: (el) ->
     w = $(el)
-    localStorage.setItem(w.attr('id')+":hidden", !w.hasClass("hidden"))
+    key = w.attr('id')+":hidden"
+    if w.hasClass("hidden")
+      localStorage.setItem(key, false)
+      $(".hide a", w).html "&ndash;"
+    else
+      localStorage.setItem(key, true)
+      $(".hide a", w).html "+"
     w.toggleClass("hidden")
 
   filter: () ->
@@ -243,4 +256,5 @@ $(document).ready () ->
 
   $("a.about-link").click () -> main_view.show_about()
   $("a.shortcuts-link").click () -> main_view.show_help()
+
 window.App = App
