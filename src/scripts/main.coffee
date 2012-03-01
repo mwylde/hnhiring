@@ -4,6 +4,19 @@ slinky_require("underscore.js")
 App =
   threads: {}
 
+  show_modal: (content) ->
+    App.hide_modal()
+    $("#modal").html content
+    $("#scrim").addClass("modal-background")
+    $("#scrim").click App.hide_modal
+    $(".close-dialog").click () -> App.hide_modal(); false
+    $("body").css("overflow", "hidden")
+
+  hide_modal: () ->
+    $("#modal").empty()
+    $("#scrim").removeClass("modal-background")
+    $("body").css("overflow", "inherit")
+
 get_threads = (cb) ->
   $.ajax url: "/data//threads.json", success: cb, dataType: 'json'
 
@@ -32,6 +45,8 @@ class MainView
         when 70 # F
           $("input[name='filter']").focus()
           false
+        when 47 # ?
+          @show_help()
 
     $("#content").scroll (() => @handle_scroll())
 
@@ -59,6 +74,9 @@ class MainView
               <div class="link">
                 <a href="#{c.url}">link</a>
               </div>
+              <div class="hide">
+                <a href="javascript:">&ndash;</a>
+              </div>
             </div>
             <div class="body">#{c.html}</div></li>
           """
@@ -67,7 +85,6 @@ class MainView
       @filter()
       cid = localStorage.getItem("selected_comment:#{@id}")
       el = $("##{cid}", @el)
-      console.log(cid, el)
       @set_current((if el.size() > 0 then el else $("li.comment", @el).first()), yes)
 
       $("li.comment", @el).click (e) =>
@@ -81,6 +98,31 @@ class MainView
       cb(App.threads[@id])
     else
       $.ajax url: "/data/comments-#{@id}.json", success: cb, dataType: 'json'
+
+  show_help: () ->
+    keys = [
+      ["J", "Scroll to the next post"],
+      ["K", "Scroll to the previous post"],
+      ["H", "Hide or show the current post"],
+      ["F", "Focus the filter field"],
+      ["&#9166;", "Blur the filter field"],
+      ["?", "Shows this help"]
+    ]
+    ul = _(keys).map ([key, desc]) ->
+      """
+        <li>
+          <div class="key">#{key}</div>
+          <div class="command">#{desc}</div>
+        </li>
+      """
+
+    App.show_modal("""
+      <div id="keyboard-shortcuts" class="modal-dialog">
+        <a href="javascript:" class="close-dialog"><img src="close.gif" /></a>
+        <h3 class="title">keyboard shortcuts</h3>
+        <ul>#{ul.join("\n")}</ul>
+      </div>
+    """)
 
   handle_scroll: () ->
     # Require 100px of scrolling before we override the current
@@ -139,6 +181,7 @@ class MainView
 $(document).ready () ->
   main_view = new MainView()
   App.main_view = main_view
+  main_view.show_help()
   get_threads (data) ->
     threads = _(data).map((d) ->
       "<li><a class=\"thread-link\" href=\"javascript:\" id=\"#{d[1]}\">#{d[0]}</a></li>")

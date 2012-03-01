@@ -105,13 +105,21 @@ a
       margin-right: 10px
       border: #ccc solid 2px
       border-bottom: #aaa solid 2px
+
       .top
         width: 100%
         height: 30px
+        position: relative        
       .link
         float: right
       .posted-by
         float: left
+      .hide
+        position: absolute
+        top: -20px
+        right: 2px  
+        font-size: 30px
+        font-weight: bold  
       .body
         line-height: 22px
       &.hidden
@@ -122,7 +130,7 @@ a
       &.current
         .posted-by:before
           position: absolute
-          left: 20px  
+          left: -12px
           content: "> "
           color: #aaa  
         border-left: #777 solid 2px
@@ -156,3 +164,61 @@ a
     color: #ccc
     text-decoration: underline
 
+
+.modal-background
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background-color: rgba(0,0,0,0.5)
+
+#keyboard-shortcuts
+  position: fixed
+  width: 400px
+  height: 345px
+  left: 50%
+  top: 50%  
+  margin-left: -200px
+  margin-top: -172.5px
+  background-color: #eee
+  ul
+    margin-top: 60px
+    li
+      list-style: none
+      height: 45px
+    .key
+      float: left
+      background-color: #666
+      color: white
+      padding: 6px
+      margin-right: 20px
+      width: 20px
+      text-align: center
+      font-weight: bold
+      border-radius: 5px
+    .command
+      line-height: 28px
+      font-size: 18px
+
+#modal
+  h3.title
+    margin: 0
+    text-align: center
+    background-color: #333
+    position: absolute
+    left: 0
+    top: 0
+    right: 0
+    height: 30px
+    padding-top: 5px
+    padding-left: 10px
+    color: white
+
+  a.close-dialog
+    z-index: 1
+    display: block
+    position: absolute
+    top: 5px
+    right: 5px
+    opacity: 0.5
