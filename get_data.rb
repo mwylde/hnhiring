@@ -23,9 +23,27 @@ def handle_time id, s
   end
 end
 
-def get_comments(id)
-  html = open("http://news.ycombinator.com/item?id=#{id}")
-  doc = Nokogiri::HTML(html.read)
+def get_comments(id, html="", link=nil)
+  sleep 0.5
+  if link == nil
+    link = "http://news.ycombinator.com/item?id=#{id}"
+  end
+  more_html_stream = open(link)
+  more_html = more_html_stream.read
+  html += more_html
+  doc = Nokogiri::HTML(more_html)
+  next_link_node = doc.css('a[href*="/x?"]')
+  if next_link_node.length > 0
+      rel_link = next_link_node.attr('href').value
+      link = "http://news.ycombinator.com#{rel_link}"
+      get_comments(id, html, link)
+  else
+      parse_results(id,html)
+  end
+end
+
+def parse_results(id, html)
+  doc = Nokogiri::HTML(html)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
