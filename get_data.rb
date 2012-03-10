@@ -23,10 +23,7 @@ def handle_time id, s
   end
 end
 
-def get_comments(id)
-  html_stream = open("http://news.ycombinator.com/item?id=#{id}")
-  html = html_stream.read
-  doc = Nokogiri::HTML(html)
+def parse_or_get_more(id, html, doc)
   next_link_node = doc.css('a[href*="/x?"]')
   if next_link_node.length > 0
       get_more_comments(id, html, next_link_node.attr('href').value)
@@ -35,26 +32,23 @@ def get_comments(id)
   end
 end
 
+def get_comments(id)
+  html_stream = open("http://news.ycombinator.com/item?id=#{id}")
+  html = html_stream.read
+  doc = Nokogiri::HTML(html)
+  parse_or_get_more(id, html, doc)
+end
+
 def get_more_comments(id, html, more_link)
-  #need to code this part
-  puts "inside get_more_comments"
   sleep 0.5
-  puts "fetching http://news.ycombinator.com#{more_link}"
   more_html_stream = open("http://news.ycombinator.com#{more_link}")
   more_html = more_html_stream.read
   html += more_html
   doc = Nokogiri::HTML(more_html)
-  next_link_node = doc.css('a[href*="/x?"]')
-  if next_link_node.length > 0
-    puts next_link_node.text
-    get_more_comments(id, html, next_link_node.attr('href').value)
-  else
-    parse_results(id,html)
-  end
+  parse_or_get_more(id, html, doc)
 end
 
 def parse_results(id, html)
-  puts "Inside parse_results"
   doc = Nokogiri::HTML(html)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
@@ -91,14 +85,6 @@ def parse_results(id, html)
   }
 end
 
-def has_more?(doc)
-  #convert to boolean
-  puts "Inside has_more"
-  target_node = doc.css('a[href*="/x?"]')
-  puts target_node
-  return target_node
-end
-
 def get_threads
   html = open('http://news.ycombinator.com/submitted?id=whoishiring')
   doc = Nokogiri::HTML(html.read)
@@ -124,10 +110,8 @@ def load_data
       comments_by_thread[t[1]] = get_comments(t[1])
       sleep 0.5 # try not to annoy PG
       puts "Loaded #{t[0]}"
-    rescue Exception => e
+    rescue
       puts "Failed on #{t[0]}: #{$!}"
-      puts e.backtrace
-      exit
     end
   }
   comments = comments_by_thread
