@@ -24,29 +24,38 @@ def handle_time id, s
 end
 
 def get_comments(id)
-  html = open("http://news.ycombinator.com/item?id=#{id}")
-  doc = Nokogiri::HTML(html.read)
-  if has_more?(doc)
-      get_more_comments(id, html)
+  html_stream = open("http://news.ycombinator.com/item?id=#{id}")
+  html = html_stream.read
+  doc = Nokogiri::HTML(html)
+  next_link_node = doc.css('a[href*="/x?"]')
+  if next_link_node.length > 0
+      get_more_comments(id, html, next_link_node.attr('href').value)
   else
       parse_results(id,html)
   end
 end
 
-def get_more_comments(id, html)
+def get_more_comments(id, html, more_link)
   #need to code this part
-  doc = Nokogiri::HTML(html.read)
-  target_link = doc.css('a[href*="/x?"]').attr('href').value
-  more_html = open("http://news.ycombinator.com#{target_link}")
-  if has_more?(doc)
-      get_more_comments(id, html)
+  puts "inside get_more_comments"
+  sleep 0.5
+  puts "fetching http://news.ycombinator.com#{more_link}"
+  more_html_stream = open("http://news.ycombinator.com#{more_link}")
+  more_html = more_html_stream.read
+  html += more_html
+  doc = Nokogiri::HTML(more_html)
+  next_link_node = doc.css('a[href*="/x?"]')
+  if next_link_node.length > 0
+    puts next_link_node.text
+    get_more_comments(id, html, next_link_node.attr('href').value)
   else
-      parse_results(id,html)
+    parse_results(id,html)
   end
 end
 
 def parse_results(id, html)
-  doc = Nokogiri::HTML(html.read)
+  puts "Inside parse_results"
+  doc = Nokogiri::HTML(html)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
@@ -64,6 +73,7 @@ def parse_results(id, html)
         :time => time.to_i
       }
     rescue
+      print "rescued!"
     end
   }.compact.reduce([]){|a, c|
     if c[:level] == 0
@@ -83,7 +93,10 @@ end
 
 def has_more?(doc)
   #convert to boolean
-  return !!doc.css('a[href*="/x?"]')
+  puts "Inside has_more"
+  target_node = doc.css('a[href*="/x?"]')
+  puts target_node
+  return target_node
 end
 
 def get_threads
@@ -111,8 +124,10 @@ def load_data
       comments_by_thread[t[1]] = get_comments(t[1])
       sleep 0.5 # try not to annoy PG
       puts "Loaded #{t[0]}"
-    rescue
+    rescue Exception => e
       puts "Failed on #{t[0]}: #{$!}"
+      puts e.backtrace
+      exit
     end
   }
   comments = comments_by_thread
