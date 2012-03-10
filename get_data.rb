@@ -23,29 +23,23 @@ def handle_time id, s
   end
 end
 
-def parse_or_get_more(id, html, doc)
-  next_link_node = doc.css('a[href*="/x?"]')
-  if next_link_node.length > 0
-      get_more_comments(id, html, next_link_node.attr('href').value)
-  else
-      parse_results(id,html)
-  end
-end
-
-def get_comments(id)
-  html_stream = open("http://news.ycombinator.com/item?id=#{id}")
-  html = html_stream.read
-  doc = Nokogiri::HTML(html)
-  parse_or_get_more(id, html, doc)
-end
-
-def get_more_comments(id, html, more_link)
+def get_comments(id, html="", link=nil)
   sleep 0.5
-  more_html_stream = open("http://news.ycombinator.com#{more_link}")
+  if link == nil
+    link = "http://news.ycombinator.com/item?id=#{id}"
+  end
+  more_html_stream = open(link)
   more_html = more_html_stream.read
   html += more_html
   doc = Nokogiri::HTML(more_html)
-  parse_or_get_more(id, html, doc)
+  next_link_node = doc.css('a[href*="/x?"]')
+  if next_link_node.length > 0
+      rel_link = next_link_node.attr('href').value
+      link = "http://news.ycombinator.com#{rel_link}"
+      get_comments(id, html, link)
+  else
+      parse_results(id,html)
+  end
 end
 
 def parse_results(id, html)
@@ -67,7 +61,6 @@ def parse_results(id, html)
         :time => time.to_i
       }
     rescue
-      print "rescued!"
     end
   }.compact.reduce([]){|a, c|
     if c[:level] == 0
