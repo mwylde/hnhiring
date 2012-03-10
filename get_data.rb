@@ -26,6 +26,27 @@ end
 def get_comments(id)
   html = open("http://news.ycombinator.com/item?id=#{id}")
   doc = Nokogiri::HTML(html.read)
+  if has_more?(doc)
+      get_more_comments(id, html)
+  else
+      parse_results(id,html)
+  end
+end
+
+def get_more_comments(id, html)
+  #need to code this part
+  doc = Nokogiri::HTML(html.read)
+  target_link = doc.css('a[href*="/x?"]').attr('href').value
+  more_html = open("http://news.ycombinator.com#{target_link}")
+  if has_more?(doc)
+      get_more_comments(id, html)
+  else
+      parse_results(id,html)
+  end
+end
+
+def parse_results(id, html)
+  doc = Nokogiri::HTML(html.read)
   comment_nodes = doc.css(".comment")
   comment_nodes.map{|c|
     submitter, link = c.parent.css("a")
@@ -58,6 +79,11 @@ def get_comments(id)
     h[c[:id]] = c
     h
   }
+end
+
+def has_more?(doc)
+  #convert to boolean
+  return !!doc.css('a[href*="/x?"]')
 end
 
 def get_threads
