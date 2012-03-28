@@ -29,6 +29,7 @@ class MainView
     @el = $("#content")
     # Set up keyboard shortcuts
     $(document).keydown (data) =>
+      console.log(data)
       switch data.which
         when 74,32 # J, space
           if !@scrolling
@@ -64,7 +65,7 @@ class MainView
     cb = (comments) =>
       App.threads[@id] = comments
       cs = _(comments).chain()
-        .sortBy((c) -> c.time)
+        .sortBy((c) -> -c.time)
         .filter((c) -> c.level == 0)
         .map((c) ->
           hidden = if localStorage.getItem("c#{c.id}:hidden") == "true" then "hidden" else ""
@@ -154,9 +155,7 @@ class MainView
             </ul>
           </p>
           <p>
-            It was made by <a href="http://micahw.com">Micah Wylde</a>, a Senior
-            studying computer science who is, coincidentally, looking for a full-time
-            job after graduation.
+            It was made by <a href="http://micahw.com">Micah Wylde</a>.
           </p>
           <p>
             The source is available on <a href="https://github.com/mwylde/hnhiring">
