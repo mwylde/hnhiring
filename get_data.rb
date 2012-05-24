@@ -86,9 +86,9 @@ def get_threads
     id = EXCEPTIONS[t[1]] || t[1]
     if date
       date_str = "#{date[1][0..2]} #{date[2]} &mdash; "
-      if t[0].match("Seeking freelancer")
+      if t[0].match(/Seeking freelancer/i)
         [date_str + "freelancers", id]
-      elsif t[0].match("Who is Hiring")
+      elsif t[0].match(/Who is Hiring/i)
         [date_str + "fulltime", id]
       end
     end
