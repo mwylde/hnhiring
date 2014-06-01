@@ -243,17 +243,18 @@ $(document).ready () ->
     id = localStorage.getItem("selected_thread") or data[1][1]
     main_view.load_thread id
 
+  debouncedFilter = _.debounce (-> main_view.filter()), 300
   $(".filter input").keydown (e) -> e.stopImmediatePropagation()
   $(".filter input").keyup (e) ->
     if e.keyCode == 13 || e.keyCode == 27 # Enter key or escape key
       $(".filter input").blur()
     else
-      main_view.filter()
+      debouncedFilter()
 
   $(".filter input").click () ->
     # We have to catch the case that the "x" button was clicked
     if $(".filter input").val() == ""
-      main_view.filter()
+      debouncedFilter()
 
   $("a.about-link").click () -> main_view.show_about()
   $("a.shortcuts-link").click () -> main_view.show_help()
