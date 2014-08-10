@@ -3,11 +3,14 @@ require 'open-uri'
 require 'json'
 require 'redis'
 
-SPACER = "http://ycombinator.com/images/s.gif"
+SPACER = "s.gif"
 
 EXCEPTIONS = {
   "3300371" => "3300290"
 }
+
+# HN doesn't like bots, even responsible ones
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17"
 
 @redis = Redis.new
 
@@ -26,16 +29,16 @@ end
 def get_comments(id, html="", link=nil)
   sleep 0.5
   if link == nil
-    link = "http://news.ycombinator.com/item?id=#{id}"
+    link = "https://news.ycombinator.com/item?id=#{id}"
   end
-  more_html_stream = open(link)
+  more_html_stream = open(link, "User-Agent" => USER_AGENT)
   more_html = more_html_stream.read
   html += more_html
   doc = Nokogiri::HTML(more_html)
   next_link_node = doc.css('a[href*="/x?"]')
   if next_link_node.length > 0
       rel_link = next_link_node.attr('href').value
-      link = "http://news.ycombinator.com#{rel_link}"
+      link = "https://news.ycombinator.com#{rel_link}"
       get_comments(id, html, link)
   else
       parse_results(id,html)
@@ -56,7 +59,7 @@ def parse_results(id, html)
         :level => c.parent.parent.css("img[src=\"#{SPACER}\"]").first.attr('width').to_i / 40,
         :html => c.to_s,
         :submitter => submitter.text,
-        :url => "http://news.ycombinator.com/#{link.attr('href')}",
+        :url => "https://news.ycombinator.com/#{link.attr('href')}",
         :belongs_to => nil,
         :time => time.to_i
       }
@@ -79,9 +82,9 @@ def parse_results(id, html)
 end
 
 def get_threads
-  html = open('http://news.ycombinator.com/submitted?id=whoishiring')
+  html = open('https://news.ycombinator.com/submitted?id=whoishiring', "User-Agent" => USER_AGENT)
   doc = Nokogiri::HTML(html.read)
-  doc.css(".title a").map{|x| [x.text, x.attr("href").match(/id=(\d+)/)[1]]}.map{|t|
+  doc.css(".title a").map{|x| [x.text, x.attr("href").match(/id=(\d+)/)[1]] rescue nil}.compact.map{|t|
     date = t[0].match(/\((\w+) (\d+)\)/)
     id = EXCEPTIONS[t[1]] || t[1]
     if date
@@ -97,8 +100,9 @@ end
 
 def load_data
   threads = get_threads
+  puts threads.inspect
   comments_by_thread = {}
-  threads.each{|t|
+  threads[0..1].each{|t|
     begin
       comments_by_thread[t[1]] = get_comments(t[1])
       sleep 0.5 # try not to annoy PG
