@@ -52,7 +52,8 @@ def parse_results(id, html)
     submitter, link = c.parent.css("a")
     begin
       cid = link.attr('href').match(/id=(\d+)/)[1]
-      time_string = c.parent.css(".comhead").children[1].to_s
+      time_string = c.parent.css(".comhead")
+                    .children.detect{|x| x.text[/second|minute|hour|day/]}.to_s
       time = handle_time cid, time_string
       {
         :id => cid,
