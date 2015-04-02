@@ -5,9 +5,20 @@ require 'redis'
 
 SPACER = "s.gif"
 
+MONTHS = %w{JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC}
+
+# Used to map from a bad thread to the corresponding good thread for
+# the month
 EXCEPTIONS = {
+  # in this case, 3300371 was posted late by whoishiring, so another
+  # poster posted a thread that became the canonical one
   "3300371" => "3300290"
 }
+
+# Used for months where a particular thread was simply not posted
+ADDITIONS = [
+  ["Apr", "2015", "fulltime", "9303396"]
+]
 
 # HN doesn't like bots, even responsible ones
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17"
@@ -85,18 +96,25 @@ end
 def get_threads
   html = open('https://news.ycombinator.com/submitted?id=whoishiring', "User-Agent" => USER_AGENT)
   doc = Nokogiri::HTML(html.read)
-  doc.css(".title a").map{|x| [x.text, x.attr("href").match(/id=(\d+)/)[1]] rescue nil}.compact.map{|t|
+  threads = doc.css(".title a").map{|x|
+    [x.text, x.attr("href").match(/id=(\d+)/)[1]] rescue nil
+  }.compact.map{|t|
     date = t[0].match(/\((\w+) (\d+)\)/)
     id = EXCEPTIONS[t[1]] || t[1]
     if date
-      date_str = "#{date[1][0..2]} #{date[2]} &mdash; "
       if t[0].match(/Seeking freelancer/i)
-        [date_str + "freelancers", id]
+        [date[1][0..2], date[2], "freelancers", id]
       elsif t[0].match(/Who is Hiring/i)
-        [date_str + "fulltime", id]
+        [date[1][0..2], date[2], "fulltime", id]
       end
     end
-  }.compact
+  }.compact + ADDITIONS
+
+  threads.sort_by{|t|
+    - (MONTHS.index(t[0].upcase) + t[1].to_i * 100)
+  }.map{|t|
+    ["#{t[0]} #{t[1]} &mdash; #{t[2]}", t[3]]
+  }
 end
 
 def load_data
