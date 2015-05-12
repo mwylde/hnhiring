@@ -17,7 +17,9 @@ EXCEPTIONS = {
 
 # Used for months where a particular thread was simply not posted
 ADDITIONS = [
-  ["Apr", "2015", "fulltime", "9303396"]
+  ["Apr", "2015", "fulltime", "9303396"],
+  ["May", "2015", "fulltime", "9471287"],
+  ["May", "2015", "freelancers", "9471301"]
 ]
 
 # HN doesn't like bots, even responsible ones
@@ -121,7 +123,7 @@ def load_data
   threads = get_threads
   puts threads.inspect
   comments_by_thread = {}
-  threads[0..1].each{|t|
+  threads[0..3].each{|t|
     begin
       comments_by_thread[t[1]] = get_comments(t[1])
       sleep 0.5 # try not to annoy PG
