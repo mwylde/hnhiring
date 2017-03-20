@@ -3,21 +3,22 @@ kind: CronJob
 metadata:
   name: hnhiring-get-data
 spec:
-  # schedule: "0,15,30,45 13,14,15,16,17,18,19,20,21,22,23  * * *"
-  schedule: "*/5 * * * *"
+  schedule: "0,15,30,45 13,14,15,16,17,18,19,20,21,22,23  * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
           - name: hnhiring-get-data
-            image: "gcr.io/micahw-com/github-mwylde-hnhiring:cb33257c04ea230d7cf33390a8e858c8928ec297"
+            image: "gcr.io/micahw-com/github-mwylde-hnhiring:1b028eb38dfb7b5f1a617ae5dcebe15ebf11dccb"
             env:
             - name: REDIS_HOST
               value: "pub-redis-18045.us-central1-1-1.gce.garantiadata.com"
             - name: REDIS_PORT
               value: "18045"
             - name: REDIS_PASS
-              value: "wCol4+Dz2TmIUcJQ"
+              valueFrom:
+                secretKeyRef:
+                  name: redis-pass
+                  key: redis-pass
           restartPolicy: Never
-          # concurrencyPolicy: Forbid
