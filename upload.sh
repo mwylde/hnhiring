@@ -1,3 +1,2 @@
-rsync -arvz -e ssh pub/ micahw.com:/var/www/hnhiring/pub
-rsync -argz -e ssh get_data.rb micahw.com:/var/www/hnhiring/
-
+gsutil defacl set public-read gs://www.hnhiring.me
+gsutil rsync -R pub/ gs://www.hnhiring.me

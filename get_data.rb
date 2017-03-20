@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'nokogiri'
 require 'open-uri'
 require 'json'
@@ -25,7 +27,9 @@ ADDITIONS = [
 # HN doesn't like bots, even responsible ones
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17"
 
-@redis = Redis.new
+@redis = Redis.new(host:  ENV['REDIS_HOST'],
+                   port: ENV['REDIS_PORT'],
+                   password: ENV['REDIS_PASS'])
 
 def handle_time id, s
   if t = @redis.get("hnhiring:comments:#{id}")
