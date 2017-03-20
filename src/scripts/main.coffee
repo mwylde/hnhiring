@@ -18,7 +18,7 @@ App =
     $("body").css("overflow", "inherit")
 
 get_threads = (cb) ->
-  $.ajax url: "/data//threads.json", success: cb, dataType: 'json'
+  $.ajax url: "/data/threads.json", success: cb, dataType: 'json'
 
 class MainView
   scrolling: false
