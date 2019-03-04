@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hnhiring-get-data
+spec:
+  # schedule: "0,15,30,45 13,14,15,16,17,18,19,20,21,22,23  * * *"
+  template:
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: gs-key
+      containers:
+        - name: hnhiring-get-data
+          image: "gcr.io/micahw-com/hnhiring_get_data:67eab4e36a8642bc53dbb05a1c24048a7ed0379a"
+          command: ["/bin/sh"]
+          args: ["-c", "echo \"[Credentials]\ngs_service_key_file=/var/secrets/google/key.json\" > ~/.boto &&  RUST_LOG=info /get_data /data && gsutil cp /data/* gs://www.hnhiring.me/data"]
+          volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/key.json
+      restartPolicy: Never
