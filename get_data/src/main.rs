@@ -103,9 +103,9 @@ struct Comment {
 }
 
 fn parse_type(title: &str) -> Option<ThreadType> {
-    if title.contains("Seeking Freelancer") {
+    if title.to_lowercase().contains("freelancer") {
         Some(ThreadType::Freelancer)
-    } else if title.contains("Who is hiring") {
+    } else if title.to_lowercase().contains("who is hiring") {
         Some(ThreadType::Fulltime)
     } else {
         None
@@ -206,7 +206,7 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
         .send()?
         .json()?;
 
-    let threads: Vec<Thread> = user.submitted[..10].par_iter()
+    let threads: Vec<Thread> = user.submitted[..72].par_iter()
         .map(|id| {
             get_item(&client, *id)
                 .map(|i| Some(i))
@@ -219,7 +219,7 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
             item.and_then(|item| item_to_thread(item))
         }).filter(|t| t.is_some())
         .map(|t| t.unwrap())
-        .filter(|t| t.date.is_current())
+        // .filter(|t| t.date.is_current())
         .collect();
 
     for thread in &threads {
@@ -233,9 +233,10 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
         fs::write(path, serde_json::to_string(&comments).unwrap()).unwrap();
     }
 
-    let thread_list: Vec<Vec<String>> = client.get("http://hnhiring.me/data/threads.json")
-        .send()?.json()?;
+//    let thread_list: Vec<Vec<String>> = client.get("http://hnhiring.me/data/threads.json")
+//        .send()?.json()?;
 
+    let thread_list: Vec<Vec<String>> = vec![];
 
     let mut thread_map: HashMap<(Date, ThreadType), ThreadListElement> = thread_list.iter()
         .filter(|p| p.len() == 2)

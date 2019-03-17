@@ -1,2 +1,2 @@
-gsutil defacl set public-read gs://www.hnhiring.me
-gsutil rsync -R pub/ gs://www.hnhiring.me
+gsutil defacl set public-read gs://new.hnhiring.me
+gsutil rsync -R pub/ gs://new.hnhiring.me
