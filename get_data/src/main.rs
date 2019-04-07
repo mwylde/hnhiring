@@ -219,7 +219,7 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
             item.and_then(|item| item_to_thread(item))
         }).filter(|t| t.is_some())
         .map(|t| t.unwrap())
-        // .filter(|t| t.date.is_current())
+        .filter(|t| t.date.is_current())
         .collect();
 
     for thread in &threads {
@@ -233,10 +233,8 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
         fs::write(path, serde_json::to_string(&comments).unwrap()).unwrap();
     }
 
-//    let thread_list: Vec<Vec<String>> = client.get("http://hnhiring.me/data/threads.json")
-//        .send()?.json()?;
-
-    let thread_list: Vec<Vec<String>> = vec![];
+    let thread_list: Vec<Vec<String>> = client.get("http://hnhiring.me/data/threads.json")
+        .send()?.json()?;
 
     let mut thread_map: HashMap<(Date, ThreadType), ThreadListElement> = thread_list.iter()
         .filter(|p| p.len() == 2)

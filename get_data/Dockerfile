@@ -14,4 +14,4 @@ COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/get_da
 
 RUN mkdir -p /data
 
-CMD RUST_LOG=info /get_data /data && gsutil cp /data/* gs://www.hnhiring.me/data
+CMD RUST_LOG=info /get_data /data && gsutil -h "Cache-Control:private" cp /data/* gs://www.hnhiring.me/data
