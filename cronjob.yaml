@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: hnhiring-get-data
 spec:
-  schedule: "3,15,30,45 * 1,2 * *"
+  schedule: "0,15,30,45 * 1,2 * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -15,7 +15,7 @@ spec:
               secretName: gs-key
           containers:
             - name: hnhiring-get-data
-              image: "gcr.io/micahw-com/hnhiring_get_data:65a1f3720ffb2798c8d405c75e506331eacc1abe"
+              image: "gcr.io/micahw-com/hnhiring_get_data:45660462da73fdf0c8c30ab070e9b510ebfd19ab"
               command: ["/bin/sh"]
               args: ["-c", "echo \"[Credentials]\ngs_service_key_file=/var/secrets/google/key.json\" > ~/.boto &&  RUST_LOG=info /get_data /data && gsutil cp /data/* gs://www.hnhiring.me/data"]
               volumeMounts:
