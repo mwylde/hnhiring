@@ -176,27 +176,6 @@ fn expand_comments(client: &Client, thread: &Thread) -> Vec<Comment> {
         .collect()
 }
 
-fn parse_thread_list_element(s1: &str, s2: &str) -> Option<ThreadListElement> {
-    lazy_static! {
-            static ref RE: Regex = Regex::new(r"(\w+) (\d+) &mdash; (\w+)").unwrap();
-        }
-
-    let captures = RE.captures(s1)?;
-
-    Some(ThreadListElement {
-        id: u64::from_str(s2).ok()?,
-        thread_type: match &captures[3] {
-            "fulltime" => ThreadType::Fulltime,
-            "freelancers" => ThreadType::Freelancer,
-            _ => return None,
-        },
-        date: Date {
-            month: MONTHS.iter().position(|s| **s == captures[1])? as u32,
-            year: i32::from_str(&captures[2]).ok()?,
-        }
-    })
-}
-
 fn process(out_dir: &Path) -> reqwest::Result<()> {
     info!("Writing out to {:?}", out_dir);
     let client = Client::builder()
@@ -219,30 +198,22 @@ fn process(out_dir: &Path) -> reqwest::Result<()> {
             item.and_then(|item| item_to_thread(item))
         }).filter(|t| t.is_some())
         .map(|t| t.unwrap())
-        .filter(|t| t.date.is_current())
         .collect();
 
     for thread in &threads {
         info!("Processing {:?} {} {}", thread.thread_type, &MONTHS[thread.date.month as usize], thread.date.year);
-        let comments: HashMap<String, Comment> = expand_comments(&client, &thread)
-            .into_iter().map(|c| (format!("{}", c.id), c))
-            .collect();
 
-        let path = out_dir.join(format!("comments-{}.json", thread.id));
+        if thread.date.is_current() {
+            let comments: HashMap<String, Comment> = expand_comments(&client, &thread)
+                .into_iter().map(|c| (format!("{}", c.id), c))
+                .collect();
+            let path = out_dir.join(format!("comments-{}.json", thread.id));
 
-        fs::write(path, serde_json::to_string(&comments).unwrap()).unwrap();
+            fs::write(path, serde_json::to_string(&comments).unwrap()).unwrap();
+        }
     }
 
-    let thread_list: Vec<Vec<String>> = client.get("http://hnhiring.me/data/threads.json")
-        .send()?.json()?;
-
-    let mut thread_map: HashMap<(Date, ThreadType), ThreadListElement> = thread_list.iter()
-        .filter(|p| p.len() == 2)
-        .map(|p| parse_thread_list_element(&p[0], &p[1]))
-        .filter(|p| p.is_some())
-        .map(|p| p.unwrap())
-        .map(|p| ((p.date, p.thread_type), p))
-        .collect();
+    let mut thread_map: HashMap<(Date, ThreadType), ThreadListElement> = HashMap::new();
 
     for thread in threads {
         thread_map.insert((thread.date, thread.thread_type), ThreadListElement {
